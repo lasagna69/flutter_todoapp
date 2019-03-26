@@ -1,6 +1,7 @@
 // Import MaterialApp and other widgets which we can use to quickly create a material app
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 List<String> _todoList = [];
 
@@ -27,6 +28,32 @@ class TodoList extends StatefulWidget {
 
 class TodoListState extends State<TodoList> {
   List<String> _todoItems = [];
+
+  @override
+  void initState(){
+    super.initState();
+//    const MethodChannel('plugins.flutter.io/shared_preferences')
+//        .setMockMethodCallHandler(
+//          (MethodCall methodcall) async {
+//        if (methodcall.method == 'getAll') {
+//          return {"flutter. [ No Name Saved ]"};
+//        }
+//        return null;
+//      },
+//    );
+    setData();
+//    this._todoItems = _todoList;
+//    print('inside initState: $_todoItems');
+  }
+
+  setData() {
+    SharedPreferencesTest.getList().then((value) {
+      setState(() {
+        _todoList = value;
+        _todoItems = value;
+      });
+    });
+  }
 
   void _addTodoItem(String task) {
     // Only add the task if the user actually entered something
@@ -74,12 +101,13 @@ class TodoListState extends State<TodoList> {
   Widget _buildTodoList() {
     return new ListView.builder(
       itemBuilder: (context, index) {
+//        SharedPreferencesTest.getList();
+        setData();
+        _todoItems = _todoList;
         // itemBuilder will be automatically be called as many times as it takes for the
         // list to fill up its available space, which is most likely more than the
         // number of items we have. So, we need to check the index is OK.
         if(index < _todoItems.length) {
-          SharedPreferencesTest.getList();
-          _todoItems = _todoList;
           print("inside _todoItems: $_todoItems");
           return _buildTodoItem(_todoItems[index], index);
         }
@@ -144,13 +172,15 @@ class SharedPreferencesTest {
   /// Method that returns the user todolist
   static getList() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _todoList = await prefs.getStringList("todoList");
+    List<String> temp = prefs.getStringList('todoList').toList();
+    _todoList = temp;
     print("inside todoList sharedpreferences: $_todoList");
+    return temp;
   }
 
   /// Method that saves the user todolist
   static setList(_todoItems) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.setStringList('todoList', _todoItems);
+    return prefs.setStringList('todoList', _todoItems);
   }
 }
