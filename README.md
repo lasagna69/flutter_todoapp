@@ -1,6 +1,6 @@
 # flutter_todo
 
-A Flutter ToDo application.
+A Flutter ToDo application. Following https://medium.com/the-web-tub/making-a-todo-app-with-flutter-5c63dab88190
 
 ## Getting Started
 
