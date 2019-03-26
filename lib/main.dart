@@ -1,5 +1,8 @@
 // Import MaterialApp and other widgets which we can use to quickly create a material app
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+List<String> _todoItems = [];
 
 // Code written in Dart starts exectuting from the main function. runApp is part of
 // Flutter, and requires the component which will be our app's container. In Flutter,
@@ -24,20 +27,23 @@ class TodoApp extends StatelessWidget {
 class TodoList extends StatefulWidget{
   @override
   createState() => new TodoListState();
+
 }
 
-class TodoListState extends State<TodoList>{
-  List<String> _todoItems = [];
+class TodoListState extends State<TodoList> {
+  //List<String> _todoItems = [];
 
-  void _addTodo(String task){ //Used to add items whenever button is pressed
+  void _addTodo(String task) {
+    //Used to add items whenever button is pressed
     // Only add the task if the user actually entered something
-    if(task.length > 0) {
-      setState(() => _todoItems.add(task));// notifies the app that the state has changed by using setState
+    if (task.length > 0) {
+      setState(() => _todoItems.add(task)); // notifies the app that the state has changed by using setState
     }
   }
 
-   void _removeTodo(int index) {// Much like _addTodo, this modifies the array of todo strings
-    setState(() => _todoItems.removeAt(index));// notifies the app that the state has changed by using setState
+  void _removeTodo(int index) {
+    // Much like _addTodo, this modifies the array of todo strings
+    setState(() => _todoItems.removeAt(index)); // notifies the app that the state has changed by using setState
   }
 
   // Show an alert dialog asking the user to confirm that the task is done
@@ -56,6 +62,7 @@ class TodoListState extends State<TodoList>{
                     child: new Text('MARK AS DONE'),
                     onPressed: () {
                       _removeTodo(index);
+                      SharedPreferencesTest.setList();
                       Navigator.of(context).pop();
                     }
                 )
@@ -65,9 +72,10 @@ class TodoListState extends State<TodoList>{
     );
   }
 
-  Widget _buildList (){
+  Widget _buildList() {
     return new ListView.builder(
         itemBuilder: (context, index) {
+          SharedPreferencesTest.getList();
           // itemBuilder will be automatically be called as many times as it takes for the
           // list to fill up its available space, which is most likely more than the
           // number of todo items we have. So, we need to check the index is OK.
@@ -80,21 +88,22 @@ class TodoListState extends State<TodoList>{
 
   // Build a single todo item
   Widget _buildTodoItem(String todoText, int index) {
-      return new ListTile(
-          title: new Text(todoText),
-          onTap: () => _promptRemoveTodoItem(index)
-      );
+    return new ListTile(
+        title: new Text(todoText),
+        onTap: () => _promptRemoveTodoItem(index)
+    );
   }
 
   @override
-  Widget build(BuildContext build){
+  Widget build(BuildContext build) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Todo List'),
       ),
       body: _buildList(),
       floatingActionButton: new FloatingActionButton(
-          onPressed: _pushAddTodoScreen, // pressing this button now opens the new screen
+          onPressed: _pushAddTodoScreen,
+          // pressing this button now opens the new screen
           tooltip: 'Add task',
           child: new Icon(Icons.add)
       ),
@@ -116,6 +125,7 @@ class TodoListState extends State<TodoList>{
                     autofocus: true,
                     onSubmitted: (val) {
                       _addTodo(val);
+                      SharedPreferencesTest.setList();
                       Navigator.pop(context); // Close the add todo screen
                     },
                     decoration: new InputDecoration(
@@ -127,4 +137,20 @@ class TodoListState extends State<TodoList>{
             }
         )
     );
+  }
+
+}
+
+class SharedPreferencesTest {
+  /// Method that returns the user todolist
+  static getList() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList("todoList");
+  }
+
+  /// Method that saves the user todolist
+  static setList() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setStringList('todoList', _todoItems);
+  }
 }
