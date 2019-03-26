@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-List<String> _todoItems = [];
+List<String> _todoList = [];
 
-// Code written in Dart starts exectuting from the main function. runApp is part of
+// Code written in Dart starts executing from the main function. runApp is part of
 // Flutter, and requires the component which will be our app's container. In Flutter,
 // every component is known as a "widget".
 void main() => runApp(new TodoApp());
@@ -31,19 +31,21 @@ class TodoList extends StatefulWidget{
 }
 
 class TodoListState extends State<TodoList> {
-  //List<String> _todoItems = [];
+  List<String> _todoItems = [];
 
   void _addTodo(String task) {
     //Used to add items whenever button is pressed
     // Only add the task if the user actually entered something
     if (task.length > 0) {
       setState(() => _todoItems.add(task)); // notifies the app that the state has changed by using setState
+      _todoItems = _todoList;
     }
   }
 
   void _removeTodo(int index) {
     // Much like _addTodo, this modifies the array of todo strings
     setState(() => _todoItems.removeAt(index)); // notifies the app that the state has changed by using setState
+    _todoItems = _todoList;
   }
 
   // Show an alert dialog asking the user to confirm that the task is done
@@ -62,7 +64,7 @@ class TodoListState extends State<TodoList> {
                     child: new Text('MARK AS DONE'),
                     onPressed: () {
                       _removeTodo(index);
-                      SharedPreferencesTest.setList();
+                      SharedPreferencesTest.setList(_todoItems);
                       Navigator.of(context).pop();
                     }
                 )
@@ -105,7 +107,7 @@ class TodoListState extends State<TodoList> {
           onPressed: _pushAddTodoScreen,
           // pressing this button now opens the new screen
           tooltip: 'Add task',
-          child: new Icon(Icons.add)
+          child: new Icon(Icons.add),
       ),
     );
   }
@@ -125,7 +127,7 @@ class TodoListState extends State<TodoList> {
                     autofocus: true,
                     onSubmitted: (val) {
                       _addTodo(val);
-                      SharedPreferencesTest.setList();
+                      SharedPreferencesTest.setList(_todoItems);
                       Navigator.pop(context); // Close the add todo screen
                     },
                     decoration: new InputDecoration(
@@ -145,11 +147,11 @@ class SharedPreferencesTest {
   /// Method that returns the user todolist
   static getList() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList("todoList");
+    _todoList = prefs.getStringList("todoList");
   }
 
   /// Method that saves the user todolist
-  static setList() async {
+  static setList(_todoItems) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.setStringList('todoList', _todoItems);
   }
