@@ -1,9 +1,10 @@
 // Import MaterialApp and other widgets which we can use to quickly create a material app
 import 'package:flutter/material.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+List<String> _todoList = [];
 
-// Code written in Dart starts executing from the main function. runApp is part of
+// Code written in Dart starts exectuting from the main function. runApp is part of
 // Flutter, and requires the component which will be our app's container. In Flutter,
 // every component is known as a "widget".
 void main() => runApp(new TodoApp());
@@ -33,11 +34,12 @@ class TodoListState extends State<TodoList> {
       // Putting our code inside "setState" tells the app that our state has changed, and
       // it will automatically re-render the list
       setState(() => _todoItems.add(task));
-
+//      _todoList.add(task);
     }
   }
 
   void _removeTodoItem(int index) {
+//    _todoList.removeAt(index);
     setState(() => _todoItems.removeAt(index));
   }
 
@@ -58,6 +60,7 @@ class TodoListState extends State<TodoList> {
                     child: new Text('MARK AS DONE'),
                     onPressed: () {
                       _removeTodoItem(index);
+                      SharedPreferencesTest.setList(_todoItems);
                       Navigator.of(context).pop();
                     }
                 )
@@ -73,8 +76,11 @@ class TodoListState extends State<TodoList> {
       itemBuilder: (context, index) {
         // itemBuilder will be automatically be called as many times as it takes for the
         // list to fill up its available space, which is most likely more than the
-        // number of todo items we have. So, we need to check the index is OK.
+        // number of items we have. So, we need to check the index is OK.
         if(index < _todoItems.length) {
+          SharedPreferencesTest.getList();
+          _todoItems = _todoList;
+          print("inside _todoItems: $_todoItems");
           return _buildTodoItem(_todoItems[index], index);
         }
       },
@@ -120,6 +126,7 @@ class TodoListState extends State<TodoList> {
                     onSubmitted: (val) {
                       _addTodoItem(val);
                       Navigator.pop(context); // Close the add todo screen
+                      SharedPreferencesTest.setList(_todoItems);
                     },
                     decoration: new InputDecoration(
                         hintText: 'Enter something to do...',
@@ -133,3 +140,17 @@ class TodoListState extends State<TodoList> {
   }
 }
 
+class SharedPreferencesTest {
+  /// Method that returns the user todolist
+  static getList() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    _todoList = await prefs.getStringList("todoList");
+    print("inside todoList sharedpreferences: $_todoList");
+  }
+
+  /// Method that saves the user todolist
+  static setList(_todoItems) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setStringList('todoList', _todoItems);
+  }
+}
