@@ -28,10 +28,46 @@ class TodoList extends StatefulWidget{
 
 class TodoListState extends State<TodoList>{
   @override
+
+  List<String> _todoItems = [];
+
+  void _addTodo(){ //Used to add items whenever button is pressed
+    setState(() {
+      int index = _todoItems.length;
+      _todoItems.add('Item '+index.toString());
+    });
+  }
+
+  Widget _buildList (){
+    return new ListView.builder(
+        itemBuilder: (context, index) {
+          // itemBuilder will be automatically be called as many times as it takes for the
+          // list to fill up its available space, which is most likely more than the
+          // number of todo items we have. So, we need to check the index is OK.
+          if (index < _todoItems.length) {
+            return _buildTodoItem(_todoItems[index]);
+          }
+        }
+    );
+  }
+
+  // Build a single todo item
+  Widget _buildTodoItem(String todoText) {
+      return new ListTile(
+          title: new Text(todoText)
+      );
+  }
+
   Widget build(BuildContext build){
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Todo List'),
+      ),
+      body: _buildList(),
+      floatingActionButton: new FloatingActionButton(
+          onPressed: _addTodo,
+          tooltip: 'Add task',
+          child: new Icon(Icons.add)
       ),
     );
   }
